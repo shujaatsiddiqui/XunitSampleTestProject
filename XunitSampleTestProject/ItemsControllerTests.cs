@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Catalog.Api.Controllers;
 using Catalog.Api.Dtos;
@@ -10,23 +11,51 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Catalog.UnitTests
 {
-    public class ItemsControllerTests
+    public class ControllerFixture : IDisposable
     {
-        private readonly Mock<IItemsRepository> repositoryStub = new();
-        private readonly Mock<ILogger<ItemsController>> loggerStub = new();
+        public ControllerFixture()
+        {
+          
+        }
+
+        public Mock<IItemsRepository> RepositoryStub = new();
+        public Mock<ILogger<ItemsController>> LoggerStub = new();
+
+        public void Dispose()
+        {
+            // throw new NotImplementedException();
+        }
+    }
+    public class ItemsControllerTests : IClassFixture<ControllerFixture>
+    {
+        private readonly Mock<IItemsRepository> _repositoryStub;
+        private readonly Mock<ILogger<ItemsController>> _loggerStub;
+        private readonly ControllerFixture _controllerFixtureObj;
+        public readonly ITestOutputHelper _output;
         private readonly Random rand = new();
+
+        public ItemsControllerTests(ITestOutputHelper output,ControllerFixture controllerFixtureObj)
+        {
+            _output = output;
+            _output.WriteLine("Constructor");
+            _repositoryStub = controllerFixtureObj.RepositoryStub ;
+            _loggerStub = controllerFixtureObj.LoggerStub;
+            _controllerFixtureObj = controllerFixtureObj;
+        }
 
         [Fact]
         public async Task GetItemAsync_WithUnexistingItem_ReturnsNotFound()
         {
+            _output.WriteLine("GetItemAsync_WithUnexistingItem_ReturnsNotFound");
             // Arrange
-            repositoryStub.Setup(repo => repo.GetItemAsync(It.IsAny<Guid>()))
+            _repositoryStub.Setup(repo => repo.GetItemAsync(It.IsAny<Guid>()))
                 .ReturnsAsync((Item)null);
 
-            var controller = new ItemsController(repositoryStub.Object, loggerStub.Object);
+            var controller = new ItemsController(_repositoryStub.Object, _loggerStub.Object);
 
             // Act
             var result = await controller.GetItemAsync(Guid.NewGuid());
@@ -38,13 +67,14 @@ namespace Catalog.UnitTests
         [Fact]
         public async Task GetItemAsync_WithExistingItem_ReturnsExpectedItem()
         {
+            _output.WriteLine("GetItemAsync_WithExistingItem_ReturnsExpectedItem");
             // Arrange
             Item expectedItem = CreateRandomItem();
 
-            repositoryStub.Setup(repo => repo.GetItemAsync(It.IsAny<Guid>()))
+            _repositoryStub.Setup(repo => repo.GetItemAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(expectedItem);
 
-            var controller = new ItemsController(repositoryStub.Object, loggerStub.Object);
+            var controller = new ItemsController(_repositoryStub.Object, _loggerStub.Object);
 
             // Act
             var result = await controller.GetItemAsync(Guid.NewGuid());
@@ -56,13 +86,14 @@ namespace Catalog.UnitTests
         [Fact]
         public async Task GetItemsAsync_WithExistingItems_ReturnsAllItems()
         {
+            _output.WriteLine("GetItemsAsync_WithExistingItems_ReturnsAllItems");
             // Arrange
             var expectedItems = new[] { CreateRandomItem(), CreateRandomItem(), CreateRandomItem() };
 
-            repositoryStub.Setup(repo => repo.GetItemsAsync())
+            _repositoryStub.Setup(repo => repo.GetItemsAsync())
                 .ReturnsAsync(expectedItems);
 
-            var controller = new ItemsController(repositoryStub.Object, loggerStub.Object);
+            var controller = new ItemsController(_repositoryStub.Object, _loggerStub.Object);
 
             // Act
             var actualItems = await controller.GetItemsAsync();
@@ -74,6 +105,7 @@ namespace Catalog.UnitTests
         [Fact]
         public async Task GetItemsAsync_WithMatchingItems_ReturnsMatchingItems()
         {
+            _output.WriteLine("GetItemsAsync_WithMatchingItems_ReturnsMatchingItems");
             // Arrange
             var allItems = new[]
             {
@@ -84,10 +116,10 @@ namespace Catalog.UnitTests
 
             var nameToMatch = "Potion";
 
-            repositoryStub.Setup(repo => repo.GetItemsAsync())
+            _repositoryStub.Setup(repo => repo.GetItemsAsync())
                 .ReturnsAsync(allItems);
 
-            var controller = new ItemsController(repositoryStub.Object, loggerStub.Object);
+            var controller = new ItemsController(_repositoryStub.Object, _loggerStub.Object);
 
             // Act
             IEnumerable<ItemDto> foundItems = await controller.GetItemsAsync(nameToMatch);
@@ -101,13 +133,14 @@ namespace Catalog.UnitTests
         [Fact]
         public async Task CreateItemAsync_WithItemToCreate_ReturnsCreatedItem()
         {
+            _output.WriteLine("CreateItemAsync_WithItemToCreate_ReturnsCreatedItem");
             // Arrange
             var itemToCreate = new CreateItemDto(
                 Guid.NewGuid().ToString(),
                 Guid.NewGuid().ToString(),
                 rand.Next(1000));
 
-            var controller = new ItemsController(repositoryStub.Object, loggerStub.Object);
+            var controller = new ItemsController(_repositoryStub.Object, _loggerStub.Object);
 
             // Act
             var result = await controller.CreateItemAsync(itemToCreate);
@@ -119,15 +152,16 @@ namespace Catalog.UnitTests
                 options => options.ComparingByMembers<ItemDto>().ExcludingMissingMembers()
             );
             createdItem.Id.Should().NotBeEmpty();
-            createdItem.CreatedDate.Should().BeCloseTo(DateTimeOffset.UtcNow, new TimeSpan(0,0,1000));
+            createdItem.CreatedDate.Should().BeCloseTo(DateTimeOffset.UtcNow, new TimeSpan(0, 0, 1000));
         }
 
         [Fact]
         public async Task UpdateItemAsync_WithExistingItem_ReturnsNoContent()
         {
+            _output.WriteLine("UpdateItemAsync_WithExistingItem_ReturnsNoContent");
             // Arrange
             Item existingItem = CreateRandomItem();
-            repositoryStub.Setup(repo => repo.GetItemAsync(It.IsAny<Guid>()))
+            _repositoryStub.Setup(repo => repo.GetItemAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(existingItem);
 
             var itemId = existingItem.Id;
@@ -137,7 +171,7 @@ namespace Catalog.UnitTests
                 existingItem.Price + 3
             );
 
-            var controller = new ItemsController(repositoryStub.Object, loggerStub.Object);
+            var controller = new ItemsController(_repositoryStub.Object, _loggerStub.Object);
 
             // Act
             var result = await controller.UpdateItemAsync(itemId, itemToUpdate);
@@ -149,12 +183,13 @@ namespace Catalog.UnitTests
         [Fact]
         public async Task DeleteItemAsync_WithExistingItem_ReturnsNoContent()
         {
+            _output.WriteLine("DeleteItemAsync_WithExistingItem_ReturnsNoContent");
             // Arrange
             Item existingItem = CreateRandomItem();
-            repositoryStub.Setup(repo => repo.GetItemAsync(It.IsAny<Guid>()))
+            _repositoryStub.Setup(repo => repo.GetItemAsync(It.IsAny<Guid>()))
                 .ReturnsAsync(existingItem);
 
-            var controller = new ItemsController(repositoryStub.Object, loggerStub.Object);
+            var controller = new ItemsController(_repositoryStub.Object, _loggerStub.Object);
 
             // Act
             var result = await controller.DeleteItemAsync(existingItem.Id);

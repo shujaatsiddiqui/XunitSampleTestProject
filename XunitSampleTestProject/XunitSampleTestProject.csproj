@@ -25,4 +25,23 @@
     <ProjectReference Include="..\Catalog.Api\Catalog.Api.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="Udemy\Shared\IsOddOrEvenTestData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Udemy\Shared\TestDataShare.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Udemy\CalculationsTests.cs">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Udemy\Shared\IsOddOrEvenTestData.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

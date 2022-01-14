@@ -3,12 +3,16 @@ This project contains Fluent assertion as well.
 
 #References
 https://fluentassertions.com/
+
 https://www.youtube.com/watch?v=dsD0CMgPjUk&list=PLmvP3GN5ktSHvAkqDquCzuBoj7zC1kMXh&index=6
+
 https://www.udemy.com/course/unit-testing-net-core-2x-applications-with-xunit-net/
 
 
 #Topic: Class Fixtures and IClass Fixtures
+
 https://xunit.net/docs/shared-context
+
 When to use: when you want to create a single test context and share it among all the tests in the class, and have it cleaned up after all the tests in the class have finished.
 
 Sometimes test context creation and cleanup can be very expensive. If you were to run the creation and cleanup code during every test, it might make the tests slower than you want. You can use the class fixture feature of xUnit.net to share a single object instance among all tests in a test class.
@@ -23,7 +27,9 @@ Add IClassFixture<> to the test class.
 If the test class needs access to the fixture instance, add it as a constructor argument, and it will be provided automatically.
 
 #Topic: Collection Defination
+
 https://xunit.net/docs/shared-context
+
 When to use: when you want to create a single test context and share it among tests in several test classes, and have it cleaned up after all the tests in the test classes have finished.
 
 Sometimes you will want to share a fixture object among multiple test classes. The database example used for class fixtures is a great example: you may want to initialize a database with a set of test data, and then leave that test data in place for use by multiple test classes. You can use the collection fixture feature of xUnit.net to share a single object instance among tests in several test classes.

@@ -20,7 +20,7 @@ namespace PersonalPhotos.Test
             // Arrange
             var session = Mock.Of<ISession>();
             session.Set("User", Encoding.UTF8.GetBytes("a@b.com"));
-            var context = Mock.Of<HttpContext>(x=> x.Session == session);
+            var context = Mock.Of<HttpContext>(x => x.Session == session);
             var accessor = Mock.Of<IHttpContextAccessor>(x => x.HttpContext == context);
 
             var fileStorage = Mock.Of<IFileStorage>();
@@ -37,6 +37,23 @@ namespace PersonalPhotos.Test
 
             //Assert
             Assert.Equal("Display", result.ActionName, ignoreCase: true);
+        }
+
+        [Fact]
+        public void Display__WhenSessionIsNull_ThrowException()
+        {
+            // Arrange           
+            var context = Mock.Of<HttpContext>();
+            var accessor = Mock.Of<IHttpContextAccessor>(x => x.HttpContext == context);
+
+            var fileStorage = Mock.Of<IFileStorage>();
+            var keyGen = Mock.Of<IKeyGenerator>();
+            var photoMetadata = Mock.Of<IPhotoMetaData>();
+            var controller = new PhotosController(keyGen, accessor, photoMetadata, fileStorage);
+
+            //Assert
+            Assert.Throws<NullReferenceException>(() => { controller.Display(); });
+
         }
 
     }

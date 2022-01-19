@@ -42,3 +42,9 @@ Create the collection definition class, decorating it with the [CollectionDefini
 Add ICollectionFixture<> to the collection definition class.
 Add the [Collection] attribute to all the test classes that will be part of the collection, using the unique name you provided to the test collection definition class's [CollectionDefinition] attribute.
 If the test classes need access to the fixture instance, add it as a constructor argument, and it will be provided automatically.
+
+#CoverLet Coverage
+
+https://www.code4it.dev/blog/code-coverage-vs-2019-coverlet
+
+
